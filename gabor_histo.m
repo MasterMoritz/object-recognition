@@ -1,5 +1,5 @@
 %TODO create histogram of images with gabor filter
-
+clear;
 %paths to the images
 airplane_path = './images/airplanes/';
 car_path = './images/car_side/';
@@ -12,7 +12,7 @@ rows = 159;
 cols = 240;
 
 %number of images that should be used (1 for testing purposes)
-image_count = 2;
+image_count = 122;
 
 %gabor orientation increments in degrees
 orientation_inc = 15;
@@ -45,11 +45,12 @@ end
 %calculate histograms
 %for each orientation save the number of pixels that have maximum intensity
 %at that orientation
-airplane_histograms = zeros(image_count, num_angles);
-car_histograms = zeros(image_count, num_angles);
+%last value indicates wheter image is airplane or car
+airplane_histograms = zeros(image_count, num_angles+1);
+car_histograms = zeros(image_count, num_angles+1);
 airplane_energies = zeros(rows, cols, num_angles,'uint8');
 car_energies = zeros(rows, cols, num_angles,'uint8');
-orientation = 2*pi/num_angles;
+orientation = pi/num_angles;
 
 for j=1:image_count
     for i=1:num_angles
@@ -86,4 +87,14 @@ for j=1:image_count
             car_histograms(j,max_c_angle) = car_histograms(j,max_c_angle) + 1;
         end
     end
+    airplane_histograms(j,num_angles+1) = 1;
+    car_histograms(j,num_angles+1) = -1;
 end
+
+rng('shuffle');
+p=randperm(size(airplane_histograms,1));
+data = cat(1,airplane_histograms(p,:), car_histograms(p,:));
+ControlData = data(1:2:end,:);
+TrainData = data(2:2:end,:);
+dlmwrite('trainData.txt',TrainData);
+dlmwrite('testData.txt',ControlData);

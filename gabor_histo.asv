@@ -1,5 +1,5 @@
 %TODO create histogram of images with gabor filter
-
+clear;
 %paths to the images
 airplane_path = './images/airplanes/';
 car_path = './images/car_side/';
@@ -45,11 +45,12 @@ end
 %calculate histograms
 %for each orientation save the number of pixels that have maximum intensity
 %at that orientation
-airplane_histograms = zeros(num_angles,image_count);
-car_histograms = zeros(image_count, num_angles);
+%last value indicates wheter image is airplane or car
+airplane_histograms = zeros(image_count, num_angles+1);
+car_histograms = zeros(image_count, num_angles+1);
 airplane_energies = zeros(rows, cols, num_angles,'uint8');
 car_energies = zeros(rows, cols, num_angles,'uint8');
-orientation = 2*pi/num_angles;
+orientation = pi/num_angles;
 
 for j=1:image_count
     for i=1:num_angles
@@ -86,7 +87,17 @@ for j=1:image_count
             car_histograms(j,max_c_angle) = car_histograms(j,max_c_angle) + 1;
         end
     end
+    airplane_histograms(j,num_angles+1) = 1;
+    car_histograms(j,num_angles+1) = 0;
 end
 
-%reshape histograms into 50vectors (for adaboost?)
-test = reshape(airplane_histograms(1),50,1);
+rng('shuffle');
+p=randperm(size(airplane_histograms,2));
+data = cat(2,airplane_histograms(p), car_histograms(p));
+ControlData = data(:,1:2:end);
+TrainData = data(:,2:2:end);
+dlmwrite('test.txt',TrainData);
+weak_learner = tree_node_w(3);
+[L, W] = RealAdaBoost(weak_learner, TrainData, TrainLabels, 100);
+Result = sign(Classify(L,W,ControlData));
+Error = sum(ControlLabels ~= Result) / length(ControlLabels);
