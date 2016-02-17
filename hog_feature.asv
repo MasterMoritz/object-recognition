@@ -1,0 +1,2 @@
+im = imread('cameraman.tif');
+ hog = hog_feature_vector (im)
