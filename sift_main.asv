@@ -1,0 +1,28 @@
+%load images
+%clear;
+[airplane_images, car_images] = imageload();
+image_count = size(airplane_images,3);
+
+airplane_features = zeros(image_count,201);
+car_features = zeros(image_count,201);
+
+for i=1:image_count
+    [f,d] = vl_sift(single(airplane_images(:,:,i)));
+    f = f(1:4,1:50);
+    f = reshape(f,1,size(f,1)*size(f,2));
+    airplane_features(i,:) = cat(2,f,1);
+end
+for i=1:image_count
+    [f,d] = vl_sift(single(car_images(:,:,i)));
+    f = f(1:4,1:50);
+    f = reshape(f,1,size(f,1)*size(f,2));
+    car_features(i,:) = cat(2,f,-1);
+end
+
+rng('shuffle');
+p=randperm(size(airplane_histograms,1));
+data = cat(1,airplane_features(p, car_features);
+ControlData = data(1:2:end,:);
+TrainData = data(2:2:end,:);
+dlmwrite('trainData_sift.txt',TrainData);
+dlmwrite('testData_sift.txt',ControlData);

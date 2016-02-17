@@ -16,7 +16,6 @@ for i=2:image_count
     car_features(i,:) = cat(2,hog_feature_vector (car_images(:,:,i)),-1);
 end
 
-%write half images as train data and the other half as test data
 data = cat(1,airplane_features, car_features);
 ControlData = data(1:2:end,:);
 TrainData = data(2:2:end,:);
